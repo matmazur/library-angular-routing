@@ -1,7 +1,6 @@
 'use strict';
 
 angular.module('app', ['ngRoute'])
-
     .config(function ($routeProvider) {
         $routeProvider
             .when("/list", {
@@ -36,7 +35,7 @@ angular.module('app', ['ngRoute'])
         return Book;
     })
 
-    .service("BookService", function () {
+    .service("BookService", function (Book) {
         var books = [
             new Book(1, 'Steven Sienkiewicz', 'Ból protoplasty', '343267789'),
             new Book(2, 'Bob Mickiewicz', 'Prawie, że się popłakałem', "543324427"),
@@ -59,7 +58,7 @@ angular.module('app', ['ngRoute'])
     .controller("ListController", function (BookService) {
         var that = this;
 
-        that.books = BookService.books.getAll();
+        that.books = BookService.getAll();
     })
 
     .controller("DetailsController", function (BookService, $routeParams) {
@@ -77,6 +76,5 @@ angular.module('app', ['ngRoute'])
             that.book.id = BookService.size();
             BookService.add(that.book);
             that.book = new Book();
-
         }
-    })
+    });
