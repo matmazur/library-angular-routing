@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('app', ['ngRoute', 'ngResource'])
-    .config(function ($routeProvider) {
+    .config(function ($routeProvider, $httpProvider) {
         $routeProvider
             .when("/list", {
                 templateUrl: 'html/fragments/list.html',
@@ -18,10 +18,16 @@ angular.module('app', ['ngRoute', 'ngResource'])
                 controller: 'NewController',
                 controllerAs: 'newCtrl'
             })
+            .when("/login", {
+                templateUrl: 'html/fragments/login.html',
+                controller: 'AuthController',
+                controllerAs: 'authCtrl'
+            })
             .otherwise({
                 redirect: '/list'
-            })
+            });
 
+        // $httpProvider.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
     })
 
     .constant("BOOK_ENDPOINT", "/api/books/:id")
@@ -66,5 +72,44 @@ angular.module('app', ['ngRoute', 'ngResource'])
         that.saveBook = function () {
             BookService.add(that.book);
             that.book = new Book();
+        }
+    })
+
+    //-----------AUTHENTICATION--------------//
+
+
+    .constant('LOGIN_ENDPOINT', '/login')
+
+    .service("AuthService", function ($http, LOGIN_ENDPOINT) {
+
+        this.authenticate = function (credentials, successCallback) {
+
+            var authHeader = {Authorization: 'Basic' + btoa(credentials.username + ':' + credentials.password)};
+            var config = {headers: authHeader};
+
+            $http
+                .post(LOGIN_ENDPOINT, {}, config)
+                .then(function success(value) {
+                        successCallback();
+                    },
+                    function error(reason) {
+                        console.log("Login unsuccessful\n" + reason)
+                    })
+
+        }
+    })
+
+    .controller("AuthController", function ($rootScope, $location, AuthService) {
+        alert("eeeee");
+        var that = this;
+
+        that.credentials = {};
+
+        var loginSuccess = function () {
+            $rootScope.authenticated = true;
+            $location.path("/new")
+        };
+        that.login = function () {
+            AuthService.authenticate(that.credentials, loginSuccess());
         }
     });
