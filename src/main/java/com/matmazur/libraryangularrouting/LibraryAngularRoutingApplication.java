@@ -9,6 +9,5 @@ public class LibraryAngularRoutingApplication {
     public static void main(String[] args) {
         SpringApplication.run(LibraryAngularRoutingApplication.class, args);
     }
-
 }
 

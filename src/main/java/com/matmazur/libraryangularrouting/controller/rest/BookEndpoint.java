@@ -3,6 +3,7 @@ package com.matmazur.libraryangularrouting.controller.rest;
 import com.matmazur.libraryangularrouting.model.Book;
 import com.matmazur.libraryangularrouting.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,6 @@ public class BookEndpoint {
     public BookEndpoint(BookRepository repo) {
         this.repo = repo;
     }
-
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Book>> getBooks() {
@@ -49,15 +49,16 @@ public class BookEndpoint {
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> saveBook(@RequestBody Book book) {
 
-        Book managed = repo.save(book);
+        if (book.getId() == null) {
+            Book managed = repo.save(book);
 
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(managed.getId())
-                .toUri();
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(managed.getId())
+                    .toUri();
 
-        return ResponseEntity.created(location).build();
+            return ResponseEntity.created(location).build();
+        } else return ResponseEntity.status(HttpStatus.CONFLICT).build();
     }
-
 }
