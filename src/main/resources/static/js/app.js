@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('app', ['ngRoute','ngResource'])
+angular.module('app', ['ngRoute', 'ngResource'])
     .config(function ($routeProvider) {
         $routeProvider
             .when("/list", {
@@ -24,34 +24,25 @@ angular.module('app', ['ngRoute','ngResource'])
 
     })
 
-    .factory("Book", function () {
-        function Book(id, title, author, isbn) {
-            this.id = id;
-            this.title = title;
-            this.author = author;
-            this.isbn = isbn;
-        }
+    .constant("BOOK_ENDPOINT", "/api/books/:id")
 
-        return Book;
+    .factory("Book", function ($resource, BOOK_ENDPOINT) {
+        return $resource(BOOK_ENDPOINT);
     })
 
     .service("BookService", function (Book) {
-        var books = [
-            new Book(1, 'Steven Sienkiewicz', 'Ból protoplasty', '343267789'),
-            new Book(2, 'Bob Mickiewicz', 'Prawie, że się popłakałem', "543324427"),
-            new Book(3, 'Julia Konopnicka', 'Rzeczy', "3432353")
-        ];
+
         this.size = function () {
-            return books.length;
+            return getAll().length;
         };
         this.getAll = function () {
-            return books;
+            return Book.query();
         };
         this.get = function (index) {
-            return books[index];
+            return Book.get({id: index});
         };
         this.add = function (book) {
-            books.push(book);
+            book.$save();
         }
     })
 
@@ -73,7 +64,6 @@ angular.module('app', ['ngRoute','ngResource'])
 
         that.book = new Book();
         that.saveBook = function () {
-            that.book.id = BookService.size();
             BookService.add(that.book);
             that.book = new Book();
         }
