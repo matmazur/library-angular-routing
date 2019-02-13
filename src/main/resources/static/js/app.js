@@ -91,29 +91,34 @@ angular.module('app', ['ngRoute', 'ngResource'])
             $http
                 .post(LOGIN_ENDPOINT, {}, config)
                 .then(function success(value) {
-                        console.log("success");
+                        $http.defaults.headers.post.Authorization = authHeader.Authorization;
+                        localStorage.setItem('auth', $http.defaults.headers.post.Authorization);
+                        console.log("success user " + credentials.username);
                         successCallback();
                     },
                     function error(reason) {
                         console.log("Login unsuccessful\n");
                         console.log(reason);
-
                     });
         };
 
         this.logout = function (successCallback) {
-            $http.post(LOGOUT_ENDPOINT).then(successCallback);
+            delete $http.defaults.headers.post.Authorization;
+            localStorage.setItem('auth', null);
+            successCallback();
         }
+
     })
 
-    .controller("AuthController", function ($rootScope, $location, AuthService) {
+    .controller("AuthController", function ($http, $rootScope, $location, AuthService) {
 
         var that = this;
         that.credentials = {};
 
         var loginSuccess = function () {
             $rootScope.authenticated = true;
-            $location.path("/new")
+            $location.path("/new");
+            localStorage.setItem("authenticated", $rootScope.authenticated)
         };
         that.login = function () {
             AuthService.authenticate(that.credentials, loginSuccess);
@@ -121,9 +126,23 @@ angular.module('app', ['ngRoute', 'ngResource'])
 //------------------------------------------------
         var logoutSuccess = function () {
             $rootScope.authenticated = false;
+            localStorage.setItem("authenticated", $rootScope.authenticated)
             $location.path("/")
         };
         that.logout = function () {
-            AuthService.logout(logoutSuccess());
+            AuthService.logout(logoutSuccess);
         }
-    });
+    })
+
+    .controller("MemoryCtrl", function ($http, $rootScope) {
+
+        this.onPageReload = function () {
+            $rootScope.authenticated = localStorage.getItem('authenticated');
+
+            this.headers = new Headers();
+            this.headers = this.headers.set('Authorization', localStorage.getItem("auth"));
+
+            $http.defaults.headers.post.Authorization = localStorage.getItem("auth");
+            console.log($http.defaults.headers.post.Authorization);
+        }
+    })
