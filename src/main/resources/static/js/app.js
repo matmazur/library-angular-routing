@@ -27,7 +27,7 @@ angular.module('app', ['ngRoute', 'ngResource'])
                 redirect: '/list'
             });
 
-        // $httpProvider.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
+        $httpProvider.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest";
     })
 
     .constant("BOOK_ENDPOINT", "/api/books/:id")
@@ -77,30 +77,30 @@ angular.module('app', ['ngRoute', 'ngResource'])
 
     //-----------AUTHENTICATION--------------//
 
-
     .constant('LOGIN_ENDPOINT', '/login')
 
-    .service("AuthService", function ($http, LOGIN_ENDPOINT) {
+    .service('AuthService', function ($http, LOGIN_ENDPOINT) {
 
         this.authenticate = function (credentials, successCallback) {
-
-            var authHeader = {Authorization: 'Basic' + btoa(credentials.username + ':' + credentials.password)};
+            var authHeader = {Authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password)};
             var config = {headers: authHeader};
+            console.log(credentials);
 
             $http
                 .post(LOGIN_ENDPOINT, {}, config)
                 .then(function success(value) {
+                        console.log("success");
                         successCallback();
                     },
                     function error(reason) {
-                        console.log("Login unsuccessful\n" + reason)
-                    })
+                        console.log("Login unsuccessful\n");
+                        console.log(reason);
 
+                    });
         }
     })
 
     .controller("AuthController", function ($rootScope, $location, AuthService) {
-        alert("eeeee");
         var that = this;
 
         that.credentials = {};
@@ -110,6 +110,6 @@ angular.module('app', ['ngRoute', 'ngResource'])
             $location.path("/new")
         };
         that.login = function () {
-            AuthService.authenticate(that.credentials, loginSuccess());
+            AuthService.authenticate(that.credentials, loginSuccess);
         }
     });
