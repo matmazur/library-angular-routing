@@ -15,4 +15,5 @@ public class AuthController {
         System.out.println("principal " + user);
         return user;
     }
+
 }

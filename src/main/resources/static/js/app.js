@@ -65,21 +65,23 @@ angular.module('app', ['ngRoute', 'ngResource'])
         that.book = BookService.get(index);
     })
 
-    .controller("NewController", function (BookService, Book) {
+    .controller("NewController", function (BookService, Book, $location) {
         var that = this;
 
         that.book = new Book();
         that.saveBook = function () {
             BookService.add(that.book);
             that.book = new Book();
+            $location.path("/list");
         }
     })
 
     //-----------AUTHENTICATION--------------//
 
     .constant('LOGIN_ENDPOINT', '/login')
+    .constant('LOGOUT_ENDPOINT', '/logout')
 
-    .service('AuthService', function ($http, LOGIN_ENDPOINT) {
+    .service('AuthService', function ($http, LOGIN_ENDPOINT, LOGOUT_ENDPOINT) {
 
         this.authenticate = function (credentials, successCallback) {
             var authHeader = {Authorization: 'Basic ' + btoa(credentials.username + ':' + credentials.password)};
@@ -97,12 +99,16 @@ angular.module('app', ['ngRoute', 'ngResource'])
                         console.log(reason);
 
                     });
+        };
+
+        this.logout = function (successCallback) {
+            $http.post(LOGOUT_ENDPOINT).then(successCallback);
         }
     })
 
     .controller("AuthController", function ($rootScope, $location, AuthService) {
-        var that = this;
 
+        var that = this;
         that.credentials = {};
 
         var loginSuccess = function () {
@@ -111,5 +117,13 @@ angular.module('app', ['ngRoute', 'ngResource'])
         };
         that.login = function () {
             AuthService.authenticate(that.credentials, loginSuccess);
+        };
+//------------------------------------------------
+        var logoutSuccess = function () {
+            $rootScope.authenticated = false;
+            $location.path("/")
+        };
+        that.logout = function () {
+            AuthService.logout(logoutSuccess());
         }
     });
