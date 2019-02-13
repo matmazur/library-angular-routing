@@ -138,11 +138,8 @@ angular.module('app', ['ngRoute', 'ngResource'])
 
         this.onPageReload = function () {
             $rootScope.authenticated = localStorage.getItem('authenticated');
-
-            this.headers = new Headers();
-            this.headers = this.headers.set('Authorization', localStorage.getItem("auth"));
-
             $http.defaults.headers.post.Authorization = localStorage.getItem("auth");
+
             console.log($http.defaults.headers.post.Authorization);
         }
     })
