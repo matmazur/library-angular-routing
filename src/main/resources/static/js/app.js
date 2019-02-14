@@ -52,10 +52,15 @@ angular.module('app', ['ngRoute', 'ngResource'])
         }
     })
 
-    .controller("ListController", function (BookService) {
+    .controller("ListController", function (BookService, $timeout) {
         var that = this;
 
         that.books = BookService.getAll();
+        console.log(BookService.getAll());
+
+        $timeout(function () {
+            that.books = BookService.getAll();
+        }, 1000);
     })
 
     .controller("DetailsController", function (BookService, $routeParams) {
@@ -72,7 +77,7 @@ angular.module('app', ['ngRoute', 'ngResource'])
         that.saveBook = function () {
             BookService.add(that.book);
             that.book = new Book();
-            $location.path("/list");
+            $location.url("/list/");
         }
     })
 
@@ -121,7 +126,9 @@ angular.module('app', ['ngRoute', 'ngResource'])
             localStorage.setItem("authenticated", $rootScope.authenticated)
         };
         that.login = function () {
-            AuthService.authenticate(that.credentials, loginSuccess);
+            if (that.credentials.username && that.credentials.password) {
+                AuthService.authenticate(that.credentials, loginSuccess);
+            }
         };
 //------------------------------------------------
         var logoutSuccess = function () {
@@ -132,6 +139,7 @@ angular.module('app', ['ngRoute', 'ngResource'])
         that.logout = function () {
             AuthService.logout(logoutSuccess);
         }
+
     })
 
     .controller("MemoryCtrl", function ($http, $rootScope) {
@@ -143,3 +151,17 @@ angular.module('app', ['ngRoute', 'ngResource'])
             console.log($http.defaults.headers.post.Authorization);
         }
     })
+
+    .directive('ngEnter', function () {
+        return function (scope, element, attrs) {
+            element.bind("keydown keypress", function (event) {
+                if (event.which === 13) {
+                    scope.$apply(function () {
+                        scope.$eval(attrs.ngEnter);
+                    });
+                    event.preventDefault();
+                }
+            });
+        };
+    });
+
