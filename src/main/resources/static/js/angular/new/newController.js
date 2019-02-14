@@ -1,5 +1,6 @@
 angular.module('app')
 
+    .value("added", false)
     .controller("NewController", function (BookService, Book, $location) {
         var that = this;
 
